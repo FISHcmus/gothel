@@ -5,12 +5,16 @@ class EvidenceProblemDTO(BaseModel):
     problem_statement: str
     reading_content: str
     evidence: str
+    options: list[str]
+    correct_option: int
 
 class EvidenceProblemResponseDTO(BaseModel):
     id: int
     problem_statement: str
     reading_content: str
     evidence: str
+    options: list[str]
+    correct_option: int
 
     class Config:
         from_attributes = True

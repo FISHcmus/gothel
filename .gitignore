@@ -14,3 +14,4 @@ wheels/
 /.env
 /AUTHENTICATION_GUIDE.md
 /model/model-design-guild.md
+/script/db_local.db

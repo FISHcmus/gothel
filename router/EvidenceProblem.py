@@ -22,6 +22,8 @@ async def create_reading_content(input_data: EvidenceProblemDTO,
     new_problem.reading_content = input_data.reading_content
     new_problem.evidence = input_data.evidence
     new_problem.problem_statement = input_data.problem_statement
+    new_problem.correct_answer = input_data.correct_answer
+    new_problem.options = input_data.options
     db.add(new_problem)
     db.commit()
     db.refresh(new_problem)
@@ -52,6 +54,8 @@ async def update_evidence_problem(input_data: EvidenceProblemDTO,
     problem.reading_content = input_data.reading_content
     problem.evidence = input_data.evidence
     problem.problem_statement = input_data.problem_statement
+    problem.options = input_data.options
+    problem.correct_answer = input_data.correct_answer
     db.commit()
     db.refresh(problem)
     return problem
@@ -145,3 +149,12 @@ async def get_all_problem_with_pagination(
         .limit(limit)
         .all()
     )
+
+@router.get("/get/{problem_id}", response_model=EvidenceProblemResponseDTO)
+async def get_problem_by_id(problem_id: int,
+                            db: Session = Depends(get_db)):
+    problem: EvidenceProblemDB | None = db.query(EvidenceProblemDB).filter(
+        EvidenceProblemDB.id == problem_id).first()
+    if not problem:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found")
+    return problem
