@@ -1,11 +1,10 @@
 # --- DATABASE SETUP (SQLAlchemy) ---
-from typing import List,TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
-from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, Mapped
 
-from model.Base import SessionLocal, Base, TimestampMixin
+from model.Base import Base, TimestampMixin
 if TYPE_CHECKING:
     from model.Question import EvidenceProblemDB, MultiChoiceQuestionDB
 
@@ -15,6 +14,7 @@ class UserDB(Base,TimestampMixin):
     id:Mapped[int] = Column(Integer, primary_key=True, index=True)
     username:Mapped[str] = Column(String, unique=True, index=True)
     hashed_password:Mapped[str] = Column(String)
+    role:Mapped[str] = Column(String, default="user")  # e.g., 'user', 'admin'
     # one-to-many: a user can solve many evidence problems
     evidence_problems_solved:Mapped[List["EvidenceProblemDB"]] = relationship(
         "EvidenceProblemDB",
@@ -32,22 +32,5 @@ class UserDB(Base,TimestampMixin):
         return len(self.evidence_problems_solved)
 
 
-# --- PYDANTIC SCHEMAS ---
-class UserCreate(BaseModel):
-    username: str
-    password: str
 
 
-class UserResponse(BaseModel):
-    username: str
-
-    class Config:
-        from_attributes = True  # Renamed from 'orm_mode' in Pydantic v2
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()

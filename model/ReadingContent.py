@@ -16,20 +16,20 @@ class ReadingContentDB(Base, TimestampMixin):
     id:Mapped[int] = Column(Integer, primary_key=True, index=True)
     content:Mapped[str] = Column(String)
 
-    multi_choice_questions: Mapped[List["MultiChoiceQuestionDB"]] = relationship(
-        "MultiChoiceQuestionDB",
-        back_populates="reading_content",
-        cascade="all, delete-orphan",
-    )
-    """
-    list[MultichoiceQuestionDB]: One reading passage can have multiple questions associated with it
-    """
-
-    evidence_problems: Mapped[List["EvidenceProblemDB"]] = relationship(
-        "EvidenceProblemDB",
-        back_populates="reading_content",
-        cascade="all, delete-orphan",
-    )
-    """
-    One reading passage can have multiple evidence problems associated with it
-    """
+    # multi_choice_questions: Mapped[List["MultiChoiceQuestionDB"]] = relationship(
+    #     "MultiChoiceQuestionDB",
+    #     back_populates="reading_content",
+    #     cascade="all, delete-orphan",
+    # )
+    # """
+    # list[MultichoiceQuestionDB]: One reading passage can have multiple questions associated with it
+    # """
+    #
+    # evidence_problems: Mapped[List["EvidenceProblemDB"]] = relationship(
+    #     "EvidenceProblemDB",
+    #     back_populates="reading_content",
+    #     cascade="all, delete-orphan",
+    # )
+    # """
+    # One reading passage can have multiple evidence problems associated with it
+    # """

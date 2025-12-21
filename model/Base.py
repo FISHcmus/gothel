@@ -22,3 +22,11 @@ class TimestampMixin:
 def reset_db():
     Base.metadata.drop_all(bind=engine)   # deletes tables (and all data)
     Base.metadata.create_all(bind=engine) # recreates tables from current models
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
