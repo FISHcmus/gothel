@@ -4,9 +4,12 @@ from typing import List, TYPE_CHECKING
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship, Mapped
 
-from model.Base import Base, TimestampMixin
+from model.Base import Base, TimestampMixin, user_evidence_problem_association
+
 if TYPE_CHECKING:
-    from model.Question import EvidenceProblemDB, MultiChoiceQuestionDB
+    from model.MCQuestion import MultiChoiceQuestionDB
+    from model.EvidenceProblem import EvidenceProblemDB
+
 
 # --- DATABASE MODELS ---
 class UserDB(Base,TimestampMixin):
@@ -18,14 +21,14 @@ class UserDB(Base,TimestampMixin):
     # one-to-many: a user can solve many evidence problems
     evidence_problems_solved:Mapped[List["EvidenceProblemDB"]] = relationship(
         "EvidenceProblemDB",
-        back_populates="user",
-        cascade="all, delete-orphan",
+        secondary=user_evidence_problem_association,
+        back_populates="solved_by_users",
     )
-    multichoice_problems_solved:Mapped[List["MultiChoiceQuestionDB"]] = relationship(
-        "MultiChoiceQuestionDB",
-        back_populates="user",
-        cascade="all, delete-orphan",
-    )
+    # multichoice_problems_solved:Mapped[List["MultiChoiceQuestionDB"]] = relationship(
+    #     "MultiChoiceQuestionDB",
+    #     back_populates="user",
+    #     cascade="all, delete-orphan",
+    # )
 
     @property
     def solved_evidence_count(self) -> int:

@@ -6,7 +6,6 @@ from pydantic import BaseModel
 class UserCreateDTO(BaseModel):
     username: str
     password: str
-    role: Literal["user", "admin"] = "user"
 
 
 class UserResponseDTO(BaseModel):
@@ -14,4 +13,4 @@ class UserResponseDTO(BaseModel):
     role: Literal["user", "admin"]
 
     class Config:
-        from_attributes = True  # Renamed from 'orm_mode' in Pydantic v2
+        from_attributes = True

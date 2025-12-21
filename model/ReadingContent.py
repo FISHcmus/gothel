@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship, Mapped
 
 from model.Base import Base, TimestampMixin
 if TYPE_CHECKING:
-    from model.Question import MultiChoiceQuestionDB
+    from model.MCQuestion import MultiChoiceQuestionDB
 
 
 class ReadingContentDB(Base, TimestampMixin):

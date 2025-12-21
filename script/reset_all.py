@@ -4,7 +4,8 @@ WARNING: This deletes all data.
 """
 
 from model.Base import engine, Base
-from model.Question import MultiChoiceQuestionDB, EvidenceProblemDB
+from model.MCQuestion import MultiChoiceQuestionDB
+from model.EvidenceProblem import EvidenceProblemDB
 from model.User import UserDB
 # Import to register tables
 from model.ReadingContent import ReadingContentDB

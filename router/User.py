@@ -23,7 +23,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
@@ -37,7 +37,9 @@ async def register_user(user: UserCreateDTO, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already registered")
 
     hashed_password = get_password_hash(user.password)
-    new_user = UserDB(username=user.username, hashed_password=hashed_password)
+    new_user = UserDB(username=user.username,
+                      hashed_password=hashed_password,
+                      )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

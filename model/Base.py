@@ -30,3 +30,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+user_evidence_problem_association = Table(
+    'user_evidence_problem_association',
+    Base.metadata,
+    Column('user_id', Integer, ForeignKey('user_table.id')),
+    Column('evidence_problem_id', Integer, ForeignKey('evidence_problem_table.id'))
+)
