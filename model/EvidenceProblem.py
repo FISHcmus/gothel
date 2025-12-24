@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, relationship
 from model.Base import Base, TimestampMixin, user_evidence_problem_association
 from model.User import UserDB
 
-
 class EvidenceProblemDB(Base,TimestampMixin):
     __tablename__ = "evidence_problem_table"
     id: Mapped[int] = Column(Integer, primary_key=True, index=True)

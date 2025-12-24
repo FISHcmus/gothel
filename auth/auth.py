@@ -4,7 +4,7 @@ from typing import Optional
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt import InvalidTokenError
+from jwt import InvalidTokenError, ExpiredSignatureError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 import os
@@ -67,13 +67,23 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            print(f"jwt cannot decode {username} ")
             raise credentials_exception
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     except InvalidTokenError:
+        print("Invalid token error")
         # This catches all PyJWT errors (expired, invalid signature, etc.)
         raise credentials_exception
 
     user = db.query(UserDB).filter(UserDB.username == username).first()
     if user is None:
+        print("Cannot find user in database")
         raise credentials_exception
     return user
 

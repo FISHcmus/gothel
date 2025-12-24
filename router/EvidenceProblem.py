@@ -95,10 +95,18 @@ async def search_evidence_problems(
 
 
 @router.post("/solved_by_user")
-async def solve_by_user(question_id: int,
-                        user: UserDB = Depends(get_current_user),
-                        db: Session = Depends(get_db),
-                        ):
+async def solved_by_user(question_id: int,
+                         user: UserDB = Depends(get_current_user),
+                         db: Session = Depends(get_db),
+                         ):
+    """
+    Mark a question as solved by the user
+    :param question_id:
+    :param user:
+    :param db:
+    :return:
+    """
+    print(f"User {user.username} is solving question {question_id}")
     problem: EvidenceProblemDB | None = (
         db.query(EvidenceProblemDB)
         .filter(EvidenceProblemDB.id == question_id)
@@ -144,7 +152,7 @@ async def get_all_problem_with_pagination(
     offset = page * limit
     return (
         db.query(EvidenceProblemDB)
-        .order_by(EvidenceProblemDB.id.desc())
+        .order_by(EvidenceProblemDB.id.asc())
         .offset(offset)
         .limit(limit)
         .all()
@@ -158,3 +166,20 @@ async def get_problem_by_id(problem_id: int,
     if not problem:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found")
     return problem
+
+@router.get("/is_solved_by_user")
+async def get_my_solved_problems( problem_id: int,
+    user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    for problem in user.evidence_problems_solved:
+        if problem.id == problem_id:
+            return {"solved": True}
+    return {"solved": False}
+
+@router.get("/get_all_problems_solved_by_user",response_model=List[EvidenceProblemResponseDTO])
+async def get_all_solved_problems_by_user(
+    user: UserDB = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    return user.evidence_problems_solved

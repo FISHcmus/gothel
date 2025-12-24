@@ -24,6 +24,10 @@ class UserDB(Base,TimestampMixin):
         secondary=user_evidence_problem_association,
         back_populates="solved_by_users",
     )
+    email: Mapped[str | None] = Column(String, unique=True, index=True, nullable=True)
+    avatar_id: Mapped[str | None] = Column(String, nullable=True)
+
+
     # multichoice_problems_solved:Mapped[List["MultiChoiceQuestionDB"]] = relationship(
     #     "MultiChoiceQuestionDB",
     #     back_populates="user",
