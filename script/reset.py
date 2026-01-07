@@ -7,6 +7,7 @@ from model.Base import engine, Base
 # (Add any other models you have in your project here)
 from model.MCQuestion import MultiChoiceQuestionDB
 from model.EvidenceProblem import EvidenceProblemDB
+from model.FlashlightProblem import FlashlightProblemDB
 from model.User import UserDB
 from model.ReadingContent import ReadingContentDB
 
@@ -27,13 +28,17 @@ def reset_single_table(table_name: str) -> None:
     print(f"Resetting table: {table_name}...")
 
     try:
-        # Drop the specific table
-        table.drop(bind=engine)
+        # Drop the specific table (ignore if it doesn't exist)
+        table.drop(bind=engine, checkfirst=True)
+    except Exception as e:
+        print(f"Warning dropping table '{table_name}': {e}")
+
+    try:
         # Create the specific table
-        table.create(bind=engine)
+        table.create(bind=engine, checkfirst=True)
         print(f"Successfully reset table '{table_name}'.")
     except Exception as e:
-        print(f"Error resetting table '{table_name}': {e}")
+        print(f"Error creating table '{table_name}': {e}")
 
 
 def main():

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from router import EvidenceProblem, FlashlightProblem, ReadingContent, User
+from router import EvidenceProblem, FlashlightProblem, ReadingContent, User, Assistant
 load_dotenv()
 
 # --- API ROUTES ---
@@ -22,3 +22,4 @@ app.include_router(EvidenceProblem.router)
 app.include_router(FlashlightProblem.router)
 app.include_router(ReadingContent.router)
 app.include_router(User.router)
+app.include_router(Assistant.router)

@@ -150,14 +150,19 @@ See `script/CLAUDE.md` for complete documentation of all utility scripts.
 
 ### Frontend
 
+**Package Manager**: Use **Yarn v1** (not npm) for the frontend.
+
 ```bash
 cd storefront
-npm install        # Install dependencies
-npm run dev        # Start development server (localhost:3000)
-npm run build      # Build for production
-npm run start      # Start production server
-npm run lint       # Run ESLint
-npm run lint:fix   # Fix ESLint issues
+yarn install       # Install dependencies
+yarn dev           # Start development server (localhost:3000)
+yarn build         # Build for production
+yarn start         # Start production server
+yarn lint          # Run ESLint
+yarn lint:fix      # Fix ESLint issues
+
+# For running tools, use npx
+npx shadcn@latest add <component>  # Add shadcn component
 ```
 
 ## Environment Configuration

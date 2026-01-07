@@ -10,6 +10,7 @@ dependencies = [
     "passlib[argon2,bcrypt]>=1.7.4",
     "sqlalchemy>=2.0.45",
     "pydantic>=2.12.5",
+    "openai>=1.59.7",
 ]
 
 [dependency-groups]

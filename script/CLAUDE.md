@@ -17,15 +17,16 @@ This file provides guidance to Claude Code when working with utility scripts (`s
 
 ```
 script/
-├── CLAUDE.md               # This file - guidance for utility scripts
-├── create_admin.py         # Create default admin user
-├── user_gen.py             # Generate fake users for testing
-├── evidence_data_gen.py    # Generate fake evidence problems
-├── gen_real_evidence_data.py  # Insert real evidence problems
-├── reset.py                # Reset a single database table
-├── reset_all.py            # Reset all database tables
-├── db_local.db             # Local database file (should be ignored?)
-└── __init__.py             # Package initialization
+├── CLAUDE.md                    # This file - guidance for utility scripts
+├── create_admin.py              # Create default admin user
+├── user_gen.py                  # Generate fake users for testing
+├── evidence_data_gen.py         # Generate fake evidence problems
+├── gen_real_evidence_data.py    # Insert real evidence problems
+├── gen_real_flashlight_data.py  # Insert real flashlight drill problems
+├── reset.py                     # Reset a single database table
+├── reset_all.py                 # Reset all database tables
+├── db_local.db                  # Local database file (should be ignored?)
+└── __init__.py                  # Package initialization
 ```
 
 ## Overview
@@ -270,6 +271,53 @@ Edit the `problems_data` list in the script to add more problems.
 
 ---
 
+#### gen_real_flashlight_data.py
+
+**Purpose**: Insert real, curated flashlight drill problems for testing
+
+**Usage**:
+```bash
+python -m script.gen_real_flashlight_data
+```
+
+**What it does**:
+- Resets the `flashlight_problem_table` (deletes all flashlight problems!)
+- Inserts 10 hand-crafted flashlight drill problems
+- Problems have realistic content with specific target words/phrases to find
+- Covers different difficulty levels (single words, phrases, numbers, names)
+- Skip duplicates if problem already exists
+
+**Use cases**:
+- Creating quality test data for flashlight drills
+- Demonstrating flashlight drill functionality
+- Testing rapid scanning and keyword location features
+
+**Problems Included**:
+1. Climate change (phrase)
+2. Apollo 11 - 1969 (number)
+3. Photosynthesis (single word)
+4. Artificial intelligence (phrase)
+5. Marie Curie (name)
+6. Renaissance period (historical term)
+7. Biodiversity (single word)
+8. Human skeleton - 206 bones (number)
+9. Great Wall of China (landmark name)
+10. Democracy (concept word)
+
+**Customization**:
+Edit the `problems_data` list in the script to add more problems.
+
+**Example Problem Structure**:
+```python
+{
+    "problem_statement": "Find the phrase 'climate change' in the passage",
+    "target": "climate change",
+    "reading_content": "Scientists have studied climate change for decades..."
+}
+```
+
+---
+
 ## Common Workflows
 
 ### Starting Fresh (New Development Environment)
@@ -286,6 +334,9 @@ python -m script.user_gen
 
 # 4. Add real evidence problems
 python -m script.gen_real_evidence_data
+
+# 5. Add real flashlight drill problems
+python -m script.gen_real_flashlight_data
 ```
 
 ### After Model Schema Changes
@@ -302,10 +353,11 @@ python -m script.reset user_table
 ### Quick Test Data Setup
 
 ```bash
-# Reset and populate
+# Reset and populate with all test data
 python -m script.reset_all
 python -m script.create_admin
 python -m script.gen_real_evidence_data
+python -m script.gen_real_flashlight_data
 ```
 
 ---
@@ -396,38 +448,57 @@ print(f"Successfully created {count} items!")
 
 ## Adding New Scripts
 
-### For FlashlightProblem Data Generation
+### Example: Flashlight Problem Data Generation (Implemented)
 
-Create `script/flashlight_data_gen.py`:
+The `script/gen_real_flashlight_data.py` is a good example of how to create new data generation scripts:
+
+**Key Features**:
+- Resets the table first using `reset_single_table()`
+- Defines problems_data as a list of dictionaries
+- Checks for duplicates before inserting
+- Uses proper session management with try/finally
+- Provides clear console output
+- Follows the established pattern from `gen_real_evidence_data.py`
+
+**When creating new data generation scripts**:
+1. Follow this pattern (see `gen_real_flashlight_data.py` for reference)
+2. Use `reset_single_table()` if you want to clear existing data
+3. Implement duplicate checking with `.filter().first()`
+4. Add console output for user feedback
+5. Update this CLAUDE.md with documentation
+
+### For Future Features (GapFill, etc.)
+
+Create `script/gen_real_gapfill_data.py` following the same pattern:
 
 ```python
 from sqlalchemy.orm import Session
 from model.Base import get_db
-from model.FlashlightProblem import FlashlightProblemDB
+from model.GapFill import GapFillDB
 from script.reset import reset_single_table
 
-def create_flashlight_problems(session: Session) -> None:
-    """Generate sample flashlight drill problems."""
+def create_real_gapfill_problems(session: Session) -> None:
+    """Generate sample gap-fill problems."""
     problems_data = [
         {
-            "problem_statement": "Find the word 'climate' in the passage",
-            "target": "climate",
-            "reading_content": "Scientists study climate change patterns..."
+            "reading_content": "Passage with [GAP] to fill...",
+            "correct_answer": "answer",
+            "options": ["answer", "wrong1", "wrong2"]
         },
         # Add more problems...
     ]
 
     for p_data in problems_data:
-        exists = session.query(FlashlightProblemDB).filter(
-            FlashlightProblemDB.problem_statement == p_data["problem_statement"]
+        exists = session.query(GapFillDB).filter(
+            GapFillDB.reading_content == p_data["reading_content"]
         ).first()
 
         if not exists:
-            problem = FlashlightProblemDB(**p_data)
+            problem = GapFillDB(**p_data)
             session.add(problem)
-            print(f"Added: {p_data['problem_statement']}")
+            print(f"Added: Gap-fill problem")
         else:
-            print(f"Skipped duplicate: {p_data['problem_statement']}")
+            print(f"Skipped duplicate")
 
     session.commit()
     print("Done!")
@@ -436,8 +507,8 @@ if __name__ == "__main__":
     db_gen = get_db()
     db = next(db_gen)
     try:
-        reset_single_table("flashlight_problem_table")
-        create_flashlight_problems(db)
+        reset_single_table("gapfill_table")
+        create_real_gapfill_problems(db)
     finally:
         db_gen.close()
 ```
@@ -484,6 +555,21 @@ python -m script.reset invalid_name
 - Use `fake.unique.method()` instead of `fake.method()`
 - Or handle duplicates with existence checks
 
+**6. "Foreign key... could not find table" error**
+- Error: `NoReferencedTableError: Foreign key associated with column '...' could not find table '...'`
+- **Root cause**: New model not imported in `model/__init__.py` or `script/reset.py`
+- **Fix**:
+  1. Add import to `model/__init__.py`: `from model.NewModel import NewModelDB`
+  2. Add import to `script/reset.py` (if using reset functions)
+  3. Clear Python cache: `find . -type d -name __pycache__ -exec rm -rf {} +`
+  4. Run script again
+
+**7. "no such table" error when running data generation**
+- Table doesn't exist in database yet
+- **Fix**: The script should call `reset_single_table()` which creates the table
+- Make sure the model is imported in `script/reset.py`
+- The script gets a fresh DB session AFTER resetting the table
+
 ---
 
 ## Security Warnings
@@ -526,6 +612,7 @@ The `db_local.db` file in the script directory appears to be a leftover or test 
 | Reset one table | `python -m script.reset <table_name>` |
 | Create admin | `python -m script.create_admin` |
 | Generate users | `python -m script.user_gen` |
-| Generate fake problems | `python -m script.evidence_data_gen` |
-| Generate real problems | `python -m script.gen_real_evidence_data` |
-| Fresh setup | Reset all → Create admin → Gen data |
+| Generate fake evidence problems | `python -m script.evidence_data_gen` |
+| Generate real evidence problems | `python -m script.gen_real_evidence_data` |
+| Generate real flashlight problems | `python -m script.gen_real_flashlight_data` |
+| Fresh setup | Reset all → Create admin → Gen users → Gen all data |
