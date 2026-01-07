@@ -37,3 +37,10 @@ user_evidence_problem_association = Table(
     Column('user_id', Integer, ForeignKey('user_table.id')),
     Column('evidence_problem_id', Integer, ForeignKey('evidence_problem_table.id'))
 )
+
+user_flashlight_problem_association = Table(
+    'user_flashlight_problem_association',
+    Base.metadata,
+    Column('user_id', Integer, ForeignKey('user_table.id')),
+    Column('flashlight_problem_id', Integer, ForeignKey('flashlight_problem_table.id'))
+)

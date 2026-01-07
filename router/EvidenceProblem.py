@@ -135,6 +135,47 @@ async def solved_by_user(question_id: int,
     }
 
 
+@router.post("/reset_by_user")
+async def reset_by_user(question_id: int,
+                        user: UserDB = Depends(get_current_user),
+                        db: Session = Depends(get_db),
+                        ):
+    """
+    Reset a question as to be unsolved by the user
+    :param question_id:
+    :param user:
+    :param db:
+    :return:
+    """
+    print(f"User {user.username} is solving question {question_id}")
+    problem: EvidenceProblemDB | None = (
+        db.query(EvidenceProblemDB)
+        .filter(EvidenceProblemDB.id == question_id)
+        .first()
+    )
+    if problem is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Problem not found",
+        )
+
+        # Remove the relationship if it exists
+    if problem in user.evidence_problems_solved:
+        user.evidence_problems_solved.remove(problem)
+
+    if user in problem.solved_by_users:
+        problem.solved_by_users.remove(user)
+
+    db.add(user)
+    db.add(problem)
+    db.commit()
+
+    return {
+        "solved": False,
+        "user_id": user.id,
+        "problem_id": problem.id,
+    }
+
 
 @router.get(
     "/all",
@@ -158,6 +199,7 @@ async def get_all_problem_with_pagination(
         .all()
     )
 
+
 @router.get("/get/{problem_id}", response_model=EvidenceProblemResponseDTO)
 async def get_problem_by_id(problem_id: int,
                             db: Session = Depends(get_db)):
@@ -167,19 +209,35 @@ async def get_problem_by_id(problem_id: int,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Problem not found")
     return problem
 
+
 @router.get("/is_solved_by_user")
-async def get_my_solved_problems( problem_id: int,
-    user: UserDB = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
+async def get_my_solved_problems(problem_id: int,
+                                 user: UserDB = Depends(get_current_user),
+                                 db: Session = Depends(get_db)
+                                 ):
     for problem in user.evidence_problems_solved:
         if problem.id == problem_id:
             return {"solved": True}
     return {"solved": False}
 
-@router.get("/get_all_problems_solved_by_user",response_model=List[EvidenceProblemResponseDTO])
+
+@router.get("/get_all_problems_solved_by_user", response_model=List[EvidenceProblemResponseDTO])
 async def get_all_solved_problems_by_user(
-    user: UserDB = Depends(get_current_user),
-    db: Session = Depends(get_db)
+        user: UserDB = Depends(get_current_user),
+        db: Session = Depends(get_db)
 ):
     return user.evidence_problems_solved
+
+
+@router.get("/get_user_track_status")
+async def get_user_evidence_track_status(
+        user: UserDB = Depends(get_current_user),
+        db: Session = Depends(get_db)
+):
+    total_problems = db.query(EvidenceProblemDB).count()
+    solved_problems = len(user.evidence_problems_solved)
+    return {
+        "total_problems": total_problems,
+        "solved_problems": solved_problems,
+        "unsolved_problems": total_problems - solved_problems
+    }
